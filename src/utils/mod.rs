@@ -1,5 +1,6 @@
 
 static CHARS: &'static[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static HEX_CHARS: &'static [u8; 16] = b"0123456789abcdef";
 
 pub fn encode_base64(bytes: &[u8]) -> String {
     let mut s = Vec::with_capacity((bytes.len() / 3) * 4);
@@ -33,4 +34,23 @@ pub fn decode_hex(x: &str) -> Vec<u8> {
      .chunks(2)
      .map(|byte| {(convert(byte[0]) << 4 | convert(byte[1]))})
      .collect()
+}
+
+pub fn encode_hex(bytes: &[u8]) -> String {
+    // Build up the string as UTF8 bytes, then convert
+    // into a string. It's a verbose workaround the lack
+    // of indexer within Strings in Rust.
+    let mut s = Vec::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        s.push(HEX_CHARS[(byte >> 4) as usize]);
+        s.push(HEX_CHARS[(byte & 0x0F) as usize]);
+    }
+    
+    String::from_utf8(s).unwrap()
+}
+
+
+pub fn xor_buffers(lhs: &[u8], rhs: &[u8]) -> Vec<u8> {
+    assert!(lhs.len() == rhs.len());
+    lhs.iter().zip(rhs.iter()).map(|(l,r)| l ^ r).collect()
 }
