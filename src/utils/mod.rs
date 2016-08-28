@@ -59,9 +59,10 @@ pub fn score_bytes(input: &[u8]) -> f32 {
     let mut progress = 0.0;
     for byte in input {
         if !(32 <= *byte && *byte <= 127) {
-            return -1.0
+            progress -= 10.0;
+        } else {
+            progress += get_frequency(*byte as char)
         }
-        progress += get_frequency(*byte as char)
     }
     return progress;
 }
@@ -121,9 +122,18 @@ pub fn reverse_xor(ciphertext: &[u8]) -> Option<DecryptCandidate> {
     for key in 0..255 {
         let decoded = single_xor(key, ciphertext);
         let score = score_bytes(&decoded);
+        
+        if (score <= 0.0) {
+            continue;
+        }
+
+        let text = match String::from_utf8(decoded) {
+            Ok(t) => t,
+            _     => continue,
+        };
 
         if score > max_score {
-            candidate = Some(String::from_utf8(decoded).unwrap());
+            candidate = Some(text);
             max_score = score;
         }
     }
