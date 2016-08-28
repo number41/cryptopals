@@ -123,7 +123,7 @@ pub fn reverse_xor(ciphertext: &[u8]) -> Option<DecryptCandidate> {
         let decoded = single_xor(key, ciphertext);
         let score = score_bytes(&decoded);
         
-        if (score <= 0.0) {
+        if score <= 0.0 {
             continue;
         }
 
@@ -144,3 +144,9 @@ pub fn reverse_xor(ciphertext: &[u8]) -> Option<DecryptCandidate> {
     }
 }
 
+pub fn repeating_xor(key: &[u8], bytes: &[u8]) -> Vec<u8> {
+    bytes.iter()
+        .zip(key.iter().cycle())
+        .map(|(byte,k)| byte ^ k)
+        .collect()
+}
