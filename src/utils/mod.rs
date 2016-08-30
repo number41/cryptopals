@@ -150,3 +150,9 @@ pub fn repeating_xor(key: &[u8], bytes: &[u8]) -> Vec<u8> {
         .map(|(byte,k)| byte ^ k)
         .collect()
 }
+
+pub fn hamming_distance(lhs: &[u8], rhs: &[u8]) -> u32 {
+    lhs.iter()
+        .zip(rhs.iter())
+        .fold(0, |acc, (l,r)| acc + (l^r).count_ones())
+}
