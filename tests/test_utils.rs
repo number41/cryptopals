@@ -1,6 +1,8 @@
 extern crate cryptopals;
+extern crate rustc_serialize;
 
 use cryptopals::utils::*;
+use rustc_serialize::base64::{FromBase64,ToBase64, STANDARD};
 
 #[test]
 fn test_repeating_xor() {
@@ -15,4 +17,13 @@ fn test_hamming() {
     let lhs = "this is a test";
     let rhs = "wokka wokka!!!";
     assert_eq!(37, hamming_distance(lhs.as_bytes(), rhs.as_bytes()));
+}
+
+#[test]
+fn test_base64() {
+    let actual = "Hello World!";
+    let encoded = "SGVsbG8gV29ybGQh";
+
+    assert_eq!(actual.as_bytes().to_base64(STANDARD), encoded);
+    assert_eq!(encoded.from_base64().unwrap(), actual.as_bytes());
 }

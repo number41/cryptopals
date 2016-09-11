@@ -20,7 +20,6 @@ pub fn encode_base64(bytes: &[u8]) -> String {
     String::from_utf8(s).unwrap()
 }
 
-
 pub fn decode_hex(x: &str) -> Vec<u8> {
     fn convert(byte: u8) -> u8 {
         match byte {
