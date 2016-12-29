@@ -27,3 +27,13 @@ fn test_base64() {
     assert_eq!(actual.as_bytes().to_base64(STANDARD), encoded);
     assert_eq!(encoded.from_base64().unwrap(), actual.as_bytes());
 }
+
+#[test]
+fn test_reverse_xor() {
+    let hexed = "7b5a4215415d544115415d5015455447414c155c46155f4058455c5b523f";
+    let ciphertext = decode_hex(&hexed);
+    let result = reverse_xor(&ciphertext);
+
+    assert!(result.is_some());
+    assert_eq!(result.unwrap().plaintext, "Now that the party is jumping\n");
+}
