@@ -15,7 +15,7 @@ fn guess_keysize(buffer: &Vec<u8>, min: usize, max: usize) -> usize {
     for i in min..max+1 {
         if i * 2 > buffer.len() {
             println!("2 * {} is too large for {}", i, buffer.len());
-            continue;
+            return keysize;
         }
 
         let mut chunks_iter = buffer.chunks(i);
@@ -23,7 +23,7 @@ fn guess_keysize(buffer: &Vec<u8>, min: usize, max: usize) -> usize {
         let second = chunks_iter.next();
         if !first.is_some() && !second.is_some() {
             println!("whoops, keysize {} is too large", i);
-            continue;
+            return keysize;
         }
 
         let dist = hamming_distance(&first.unwrap(), &second.unwrap());
@@ -34,8 +34,20 @@ fn guess_keysize(buffer: &Vec<u8>, min: usize, max: usize) -> usize {
         } 
     }
 
-    println!("Returning keysize {} with score {}", keysize, best_score);
-    return 0;
+    return keysize;
+}
+
+fn compute_transposed(buffer: &Vec<u8>, blocksize: usize) -> Vec<Vec<u8>> {
+    let mut transposed = Vec::new();
+    for _ in 0..blocksize {
+        transposed.push(Vec::new());
+    }
+
+    for (byte, index) in buffer.iter().zip((0..blocksize).cycle()) {
+        transposed[index].push(*byte);
+    }
+
+    return transposed;
 }
 
 fn main() {
@@ -68,4 +80,15 @@ fn main() {
 
     /* attempt to find keysizes */
     let likely = guess_keysize(&buffer, 2, 40);
+    println!("Using {} as the keysize", likely);
+    println!("  cipher     blocks: count {}, size {}", buffer.len() / likely, likely);
+
+    
+    println!("  transposed blocks: count {}, size {}", likely, buffer.len() / likely);
+
+    /* Transpose blocks */
+    let mut transposed = compute_transposed(&buffer, likely);
+    for (i, tp) in transposed.iter().enumerate() {
+        println!(" Transpose block {}: {} bytes", i, tp.len());
+    }
 }
