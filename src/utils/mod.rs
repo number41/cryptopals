@@ -112,10 +112,12 @@ pub fn single_xor(key: u8, bytes: &[u8]) -> Vec<u8> {
 pub struct DecryptCandidate {
     pub score: f32,
     pub plaintext: String,
+    pub key: u8,
 } 
 
 pub fn reverse_xor(ciphertext: &[u8]) -> Option<DecryptCandidate> {
     let mut candidate: Option<String> = None;
+    let mut c_key: Option<u8> = None;
     let mut max_score = 0.0;
     
     for key in 0..255 {
@@ -134,11 +136,12 @@ pub fn reverse_xor(ciphertext: &[u8]) -> Option<DecryptCandidate> {
         if score > max_score {
             candidate = Some(text);
             max_score = score;
+            c_key = Some(key);
         }
     }
 
     match candidate {
-        Some(c) => Some(DecryptCandidate {plaintext: c, score: max_score}),
+        Some(c) => Some(DecryptCandidate {plaintext: c, score: max_score, key: c_key.unwrap()}),
         None => None,
     }
 }
