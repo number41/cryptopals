@@ -158,3 +158,27 @@ pub fn hamming_distance(lhs: &[u8], rhs: &[u8]) -> u32 {
         .zip(rhs.iter())
         .fold(0, |acc, (l,r)| acc + (l^r).count_ones())
 }
+
+pub fn guess_keysize(buffer: &Vec<u8>, min: usize, max: usize) -> usize {
+    let mut keysize: usize = 0;
+    let mut best_score = 9999.0;
+
+    for i in min..max+1 {
+        if i * 2 > buffer.len() {
+            println!("2 * {} is too large for {}", i, buffer.len());
+            return keysize;
+        }
+
+        let first = &buffer[0..i];
+        let second = &buffer[i..2*i];
+
+        let dist = hamming_distance(&first, &second);
+        let score = dist as f32 / i as f32;
+        if score < best_score {
+            best_score = score;
+            keysize = i;
+        } 
+    }
+
+    return keysize;
+}

@@ -5,40 +5,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use rustc_serialize::base64::FromBase64;
 
-use cryptopals::utils::hamming_distance;  
-use cryptopals::utils::encode_hex;
-use cryptopals::utils::reverse_xor; 
-use cryptopals::utils::repeating_xor;   
- 
-fn guess_keysize(buffer: &Vec<u8>, min: usize, max: usize) -> usize {
-
-    let mut keysize: usize = 0;
-    let mut best_score = 9999.0;
-
-    for i in min..max+1 {
-        if i * 2 > buffer.len() {
-            println!("2 * {} is too large for {}", i, buffer.len());
-            return keysize;
-        }
-
-        let mut chunks_iter = buffer.chunks(i);
-        let first = chunks_iter.next();
-        let second = chunks_iter.next();
-        if !first.is_some() && !second.is_some() {
-            println!("whoops, keysize {} is too large", i);
-            return keysize;
-        }
-
-        let dist = hamming_distance(&first.unwrap(), &second.unwrap());
-        let score = dist as f32 / i as f32;
-        if score < best_score {
-            best_score = score;
-            keysize = i;
-        } 
-    }
-
-    return keysize;
-}
+use cryptopals::utils::*;  
 
 fn compute_transposed(buffer: &Vec<u8>, blocksize: usize) -> Vec<Vec<u8>> {
     let mut transposed = Vec::new();
