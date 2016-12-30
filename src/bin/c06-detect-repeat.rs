@@ -5,7 +5,10 @@ use std::fs::File;
 use std::io::prelude::*;
 use rustc_serialize::base64::FromBase64;
 
-use cryptopals::utils::hamming_distance;      
+use cryptopals::utils::hamming_distance;  
+use cryptopals::utils::encode_hex;
+use cryptopals::utils::reverse_xor; 
+use cryptopals::utils::repeating_xor;   
  
 fn guess_keysize(buffer: &Vec<u8>, min: usize, max: usize) -> usize {
 
@@ -82,13 +85,32 @@ fn main() {
     let likely = guess_keysize(&buffer, 2, 40);
     println!("Using {} as the keysize", likely);
     println!("  cipher     blocks: count {}, size {}", buffer.len() / likely, likely);
-
-    
     println!("  transposed blocks: count {}, size {}", likely, buffer.len() / likely);
 
     /* Transpose blocks */
-    let mut transposed = compute_transposed(&buffer, likely);
+    let transposed = compute_transposed(&buffer, likely);
     for (i, tp) in transposed.iter().enumerate() {
         println!(" Transpose block {}: {} bytes", i, tp.len());
     }
+
+    let mut key = Vec::new();
+    for i in 0..transposed.len() {
+        if let Some(candidate) = reverse_xor(&transposed[i]) {
+            key.push(candidate.key);
+        } else {
+            println!("Unable to find XOR for transpose block {}", i);
+            return;
+        }
+    }
+
+    let hexed_key = encode_hex(&key);
+    println!("Possibly found key {}", hexed_key);
+
+    let decrypted = repeating_xor(&key, &buffer);
+    if let Ok(plaintext) = String::from_utf8(decrypted) {
+        println!("{}", plaintext);
+    } else {
+        println!("Unable to make sense of the 'plaintext'. Key is probably wrong");
+    }
+
 }
