@@ -159,6 +159,33 @@ pub fn hamming_distance(lhs: &[u8], rhs: &[u8]) -> u32 {
         .fold(0, |acc, (l,r)| acc + (l^r).count_ones())
 }
 
+
+pub struct KeysizeCandidate {
+    pub score: f32,
+    pub keysize: usize,
+}
+
+pub fn guess_multiple_keysizes(buffer: &Vec<u8>, min: usize, max: usize) -> Vec<KeysizeCandidate> {
+    let mut candidates = Vec::new();
+    for i in min..max+1 {
+        if i * 4 > buffer.len() {
+            println!("2 * {} is too large for {}", i, buffer.len());
+            break;
+        }
+
+        let first = &buffer[0..i];
+        let second = &buffer[i..2*i];
+        let third = &buffer[2*i..3*i];
+        let fourth = &buffer[3*i..4*i];
+
+        let d1 = hamming_distance(&first, &second) as f32 / i as f32;
+        let d2 = hamming_distance(&third, &fourth) as f32 / i as f32;
+        candidates.push(KeysizeCandidate{score: (d1+d2)/2.0, keysize: i});
+    }
+    candidates.sort_by(|lhs,rhs| lhs.score.partial_cmp(&rhs.score).unwrap());
+    return candidates;
+}
+
 pub fn guess_keysize(buffer: &Vec<u8>, min: usize, max: usize) -> usize {
     let mut keysize: usize = 0;
     let mut best_score = 9999.0;

@@ -48,11 +48,8 @@ fn main() {
     };
     println!("Converted into a buffer of {} bytes", buffer.len());
 
-    /* attempt to find keysizes */
-    let likely = guess_keysize(&buffer, 2, 40);
-    println!("Using {} as the keysize", likely);
-    println!("  cipher     blocks: count {}, size {}", buffer.len() / likely, likely);
-    println!("  transposed blocks: count {}, size {}", likely, buffer.len() / likely);
+    /* Skip attempt to determine keysize - it's 29 */
+    let likely = 29;
 
     /* Transpose blocks */
     let transposed = compute_transposed(&buffer, likely);
@@ -72,6 +69,9 @@ fn main() {
 
     let hexed_key = encode_hex(&key);
     println!("Possibly found key {}", hexed_key);
+    if let Ok(plainkey) = String::from_utf8(key.clone()) {
+        println!("Plainkey: {}", plainkey);
+    }
 
     let decrypted = repeating_xor(&key, &buffer);
     if let Ok(plaintext) = String::from_utf8(decrypted) {
